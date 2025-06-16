@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Prise de rendez-vous</title>
+</head>
+<body>
+  <h2>Formulaire de prise de rendez-vous</h2>
+  <form id="rdv-form">
+    <label>Nom :</label><br>
+    <input type="text" name="nom" required><br><br>
+
+    <label>Email :</label><br>
+    <input type="email" name="email" required><br><br>
+
+    <label>Téléphone :</label><br>
+    <input type="text" name="telephone"><br><br>
+
+    <label>Motif :</label><br>
+    <input type="text" name="motif"><br><br>
+
+    <button type="submit">Envoyer la demande</button>
+  </form>
+
+  <p id="resultat"></p>
+
+  <script>
+    document.getElementById('rdv-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const data = Object.fromEntries(new FormData(this));
+      const response = await fetch("https://samirl.app.n8n.cloud/webhook/proposer-rdv", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+      if (result.error) {
+        document.getElementById('resultat').innerText = "Erreur : " + result.message;
+      } else {
+        document.getElementById('resultat').innerHTML = `
+          <p>Créneaux proposés :</p>
+          <ul>
+            ${result.creneaux.map((c, i) => `<li><a href="${result['lien' + (i+1)]}">${c.date} à ${c.heure}</a></li>`).join('')}
+          </ul>
+        `;
+      }
+    });
+  </script>
+</body>
+</html>
